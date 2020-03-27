@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<style>
+
+	html, body {
+		margin: 0;
+		padding: 0;
+		background: #222;
+	}
+	
+	.slider {
+		background: lightgreen;
+		display: flex;
+		overflow-x: hidden;
+		height: 400px;
+		position: relative;
+	}
+
+	.slider .slide {
+		width: 100%;
+		flex-shrink: 0;
+		transition: transform 300ms ease;
+	}
+
+	.slider .dots {
+		position: absolute;
+		bottom: 0;
+		margin-bottom: 10px;
+		margin-left: 50%;
+		transform: translateX(-50%);
+		z-index: 999;
+	}
+
+	.slider .dot {
+		display: inline-block;
+		background-color: #ddd;
+		margin: 0 0.5vw;
+	    width: 2vw;
+	    height: 2vw;
+	    min-width: 15px;
+	    min-height: 15px;
+	    max-width: 25px;
+	    max-height: 25px;
+	    border-radius: 50%;
+	    border: 1px solid #a8a8a8;;
+	    transition: all 400ms;
+	    cursor: pointer;
+	}
+	.slider .dot:hover {
+		/*background-color: #acacac;*/
+	}
+	.slider .dot.active {
+		background-color: #acacac;
+	}
+
+</style>
+
+<html> 
+	<head>
+		<meta charset="utf-8"/>
+	</head>
+	<body>
+		<div class="slider">
+			<div class="slide" style="background-color: purple">
+				One
+			</div>
+			<div class="slide" style="background-color: lightblue">
+				Two
+			</div>
+			<div class="slide" style="background-color: orange">
+				Three
+			</div>
+			<div class="slide" style="background-color: lightgreen">
+				Four
+			</div>
+			<div class="dots">
+			</div>
+		</div>
+	</body>
+</html>
+
+<script>
+	
+	// append first slide to end of slides for transition on reset
+	document.getElementsByClassName('slider')[0].appendChild(document.querySelectorAll(".slider .slide")[0].cloneNode(true));
+
+	const slider = document.getElementsByClassName('slider')[0];
+	const dots = document.getElementsByClassName('dots')[0];
+	const slides = document.querySelectorAll(".slider .slide");
+	const n_slides = slides.length;
+	const slideFrequency = 5; // in seconds
+
+	let slideInterval,
+		thisFreq = slideFrequency,
+		thisSlide = 0;
+
+	const resetInterval = function(freq){
+
+		// reset the slide interval 
+		// @freq - the frequency to set the interval (in seconds)
+
+		thisFreq = freq;
+		clearInterval(slideInterval);
+		slideInterval = setInterval(doSlide, freq * 1000);
+	}
+	
+	const doSlide = function(force){
+
+		// perform a slide action
+		// @force (boolean or undefined) - distingush between call by interval or user action
+
+		thisSlide++;
+
+		let reset = thisSlide > n_slides - 1;
+		if(reset) thisSlide = 0;
+
+		if(thisSlide == 1){ 
+			// reset interval with initial frequency
+			resetInterval(slideFrequency);
+		} else if(thisSlide > n_slides-2){ 
+			// reset interval with half-frequency
+			resetInterval(thisFreq/2);
+		}
+
+		handleDots(thisSlide+1,force);
+
+		slides.forEach(function(slide){
+			slide.style.transition = reset ? "initial" : "transform 300ms ease";
+			slide.style.transform = "translateX(-" + thisSlide * 100 + "%)";
+		});
+	}
+
+	const goToSlide = function(slide){
+
+		// go to a particular slide
+		// @slide - the slide number to go to (1-based)
+
+		clearInterval(slideInterval);
+		thisSlide = slide - 2;
+		doSlide(true);
+	}
+
+	const handleDots = function(slide, force){
+
+		// add/remove dot active classes to match current slide
+		// @slide - the slide number (1-based)
+
+		if(slide == 1 && !force) return;
+		else if(slide == n_slides) slide = 1;
+
+		document.querySelectorAll('.dot').forEach(function(dot){
+			dot.classList.remove('active');
+			if(dot.id.split('-')[1] == slide){
+				dot.classList.add('active');
+			}
+		});
+	}
+
+	slideInterval = setInterval(doSlide, thisFreq*1000);
+
+	// mouseover event (pause)
+	slider.addEventListener('mouseover',function(){
+		clearInterval(slideInterval);
+	});
+
+	// mouseleave event (reset)
+	slider.addEventListener('mouseleave',function(){
+		slideInterval = setInterval(doSlide, thisFreq*1000);
+	});
+
+	// generate control dots
+	for(let i=0; i < n_slides-1; i++){
+
+		// render dot elements
+		let dot = document.createElement('span');
+		dot.classList.add('dot');
+		dot.setAttribute('id', `dot-${i+1}`)
+		if(i==0) dot.classList.add('active');
+		dots.appendChild(dot);
+
+		// add click event listener
+		dot.addEventListener('click', function(e){
+			goToSlide(e.target.id.split('-')[1]);
+		})
+	}
+
+</script>
