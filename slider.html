@@ -7,7 +7,7 @@
 		background: #222;
 	}
 	
-	.slider {
+	.sliderr {
 		background: lightgreen;
 		display: flex;
 		overflow-x: hidden;
@@ -15,13 +15,13 @@
 		position: relative;
 	}
 
-	.slider .slide {
+	.sliderr .slide {
 		width: 100%;
 		flex-shrink: 0;
 		transition: transform 300ms ease;
 	}
 
-	.slider .dots {
+	.sliderr .dots {
 		position: absolute;
 		bottom: 0;
 		margin-bottom: 10px;
@@ -30,7 +30,7 @@
 		z-index: 999;
 	}
 
-	.slider .dot {
+	.sliderr .dot {
 		display: inline-block;
 		background-color: #ddd;
 		margin: 0 0.5vw;
@@ -45,13 +45,31 @@
 	    transition: all 400ms;
 	    cursor: pointer;
 	}
-	.slider .dot:hover {
+	.sliderr .dot:hover {
 		/*background-color: #acacac;*/
 	}
-	.slider .dot.active {
+	.sliderr .dot.active {
 		background-color: #acacac;
 	}
-
+	.sliderr .chevrons {
+		display: flex;
+		justify-content: space-between;
+		position: absolute;
+		top: 45%;
+		bottom: 50%;
+		width: 100%;
+		z-index: 999;
+		color: #fff;
+		font-size: 40px;
+	}
+	.sliderr .chevrons .chevron-left {
+		margin-left: 2vw;
+		cursor: pointer;
+	}
+	.sliderr .chevrons .chevron-right {
+		margin-right: 2vw;
+		cursor: pointer;
+	}
 </style>
 
 <html> 
@@ -59,7 +77,7 @@
 		<meta charset="utf-8"/>
 	</head>
 	<body>
-		<div class="slider">
+		<div class="sliderr">
 			<div class="slide" style="background-color: purple">
 				One
 			</div>
@@ -72,6 +90,10 @@
 			<div class="slide" style="background-color: lightgreen">
 				Four
 			</div>
+			<div class="chevrons">
+				<span class="chevron-left"><</span>
+				<span class="chevron-right">></span>
+			</div>
 			<div class="dots">
 			</div>
 		</div>
@@ -81,11 +103,11 @@
 <script>
 	
 	// append first slide to end of slides for transition on reset
-	document.getElementsByClassName('slider')[0].appendChild(document.querySelectorAll(".slider .slide")[0].cloneNode(true));
+	document.getElementsByClassName('sliderr')[0].appendChild(document.querySelectorAll(".sliderr .slide")[0].cloneNode(true));
 
-	const slider = document.getElementsByClassName('slider')[0];
+	const sliderr = document.getElementsByClassName('sliderr')[0];
 	const dots = document.getElementsByClassName('dots')[0];
-	const slides = document.querySelectorAll(".slider .slide");
+	const slides = document.querySelectorAll(".sliderr .slide");
 	const n_slides = slides.length;
 	const slideFrequency = 5; // in seconds
 
@@ -158,12 +180,12 @@
 	slideInterval = setInterval(doSlide, thisFreq*1000);
 
 	// mouseover event (pause)
-	slider.addEventListener('mouseover',function(){
+	sliderr.addEventListener('mouseover',function(){
 		clearInterval(slideInterval);
 	});
 
 	// mouseleave event (reset)
-	slider.addEventListener('mouseleave',function(){
+	sliderr.addEventListener('mouseleave',function(){
 		slideInterval = setInterval(doSlide, thisFreq*1000);
 	});
 
@@ -182,5 +204,18 @@
 			goToSlide(e.target.id.split('-')[1]);
 		})
 	}
+
+	// chevron left right events
+	document.querySelector('.sliderr .chevron-left').addEventListener('click',function(e){
+
+		thisSlide = thisSlide - 1 < 0 ? thisSlide = n_slides - 2: thisSlide - 1;
+		goToSlide(thisSlide + 1);
+	});
+
+	document.querySelector('.sliderr .chevron-right').addEventListener('click',function(e){
+
+		thisSlide = thisSlide++ >= n_slides - 2 ? thisSlide = 0 : thisSlide++;
+		goToSlide(thisSlide + 1);
+	});
 
 </script>
